@@ -1,0 +1,22 @@
+.drawer-item{
+    font-family: 'Roboto', sans-serif;
+    color: #bec2c6;
+}
+.drawer-item.MuiButtonBase-root:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Fundo levemente claro ao passar o mouse */
+    transition: background-color 0.3s ease; /* Suaviza a transição */
+}
+.drawer-icon{
+    color: #bec2c6;
+}
+.drawer-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    color: #bec2c6;
+    font-family: 'Roboto', sans-serif;
+}
+.drawer-item-text{
+    color: #bec2c6;
+}
