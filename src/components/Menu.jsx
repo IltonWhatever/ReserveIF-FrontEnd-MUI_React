@@ -1,62 +1,59 @@
 import React from 'react';
-import { Drawer, List, ListItem, ListItemButton , ListItemIcon, ListItemText, Box } from '@mui/material';
+import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import logo from '../assets/logoBranca.png'; // Importe a logo
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import logo from '../assets/logoBranca.png'; 
 import { useNavigate } from 'react-router-dom';
-
-
 import '../css/menu.css';
 
 function VerticalMenu() {
-  
-  const navigate = useNavigate(); // Hook para navegação
-  // Funções de navegação
-  const goToLogin = () => navigate('/Login');
+  const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    navigate(path); // Navega para o caminho fornecido
+  };
 
   return (
     <Drawer
-      variant="permanent" // Mantém o menu fixo
+      variant="permanent"
       sx={{
-        width: 240,
+        minWidth:'12vw',
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: {
-          width: 240,
+          minWidth:'12vw',
           boxSizing: 'border-box',
-          backgroundColor: '#1F2732', // Cor de fundo cinza
+          backgroundColor: '#1F2732',
         },
       }}
     >
       {/* Logo na parte superior */}
-      <Box className='drawer-box'>
+      <Box className="drawer-box">
         <img src={logo} alt="Logo" style={{ width: '200px' }} />
       </Box>
-      <Box className='drawer-box'>
-        Menu
-      </Box>
+      <Box className="drawer-box">Menu</Box>
 
       {/* Lista de opções */}
       <List>
-        <ListItemButton className='drawer-item' onClick={goToLogin}>
+        <ListItemButton className="drawer-item" onClick={() => handleNavigation('/Login')}>
           <ListItemIcon>
-            <LaptopMacIcon className='drawer-icon'/>
+            <LaptopMacIcon className="drawer-icon" />
           </ListItemIcon>
-          <ListItemText className='drawer-item-text' primary="Laboratórios" />
+          <ListItemText className="drawer-item-text" primary="Laboratórios" />
         </ListItemButton>
 
-        <ListItemButton className='drawer-item'>
+        <ListItemButton className="drawer-item" onClick={() => handleNavigation('/Reservas')}>
           <ListItemIcon>
-            <EventAvailableIcon className='drawer-icon'/>
+            <EventAvailableIcon className="drawer-icon" />
           </ListItemIcon>
-          <ListItemText className='drawer-item-text' primary="Reservas" />
+          <ListItemText className="drawer-item-text" primary="Reservas" />
         </ListItemButton>
 
-        <ListItemButton className='drawer-item'>
+        <ListItemButton className="drawer-item" onClick={() => handleNavigation('/Relatorios')}>
           <ListItemIcon>
-            <AssessmentIcon className='drawer-icon'/>
+            <AssessmentIcon className="drawer-icon" />
           </ListItemIcon>
-          <ListItemText className='drawer-item-text' primary="Relatórios" />
+          <ListItemText className="drawer-item-text" primary="Relatórios" />
         </ListItemButton>
       </List>
     </Drawer>

@@ -38,13 +38,13 @@ function LoginForm() {
   const navigate = useNavigate();
 
   const goToUserForm = () => {
-    navigate('/UserForm');
-    console.log('Redirecionando para Formulario');
-  }
+    navigate("/UserForm");
+    console.log("Redirecionando para Formulario");
+  };
 
   const handleForgotPassword = () => {
-    // Lógica para redirecionar à página de recuperação de senha
-    console.log('Redirecionando para recuperação de senha...');
+    navigate("/RecoverPass");
+    console.log("Redirecionando para recuperação de senha...");
   };
 
   return (
@@ -88,6 +88,7 @@ function LoginForm() {
           color="primary"
           fullWidth
           sx={{
+            marginTop: '10px',
             backgroundColor: "green",
             "&:hover": {
               backgroundColor: "darkgreen",

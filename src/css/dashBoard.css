@@ -1,0 +1,8 @@
+.custom-arrow {
+    transition: background-color 0.3s; /* Transição suave para o fundo */
+  }
+  
+  .custom-arrow:hover {
+    background-color: #444; /* Muda a cor ao passar o mouse */
+  }
+  
