@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import { TextField, Button, Container, Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import Alert from "@mui/material/Alert";
+import CheckIcon from '@mui/icons-material/Check';
 
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({}); // Estado para armazenar os erros de validação
+  const [errors, setErrors] = useState({});
+  const [loginError, setLoginError] = useState(""); // Estado para mensagem de erro de login
+  const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.successMessage; // Acessa a mensagem de sucesso, se existir
 
   const validate = () => {
     let tempErrors = {};
@@ -28,23 +34,46 @@ function LoginForm() {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setLoginError(""); // Limpa mensagens de erro anteriores
     if (validate()) {
-      // Lógica para login (ex: validação, requisição API)
-      console.log("Usuário:", username);
-      console.log("Senha:", password);
+      const data = {
+        emailOrCode: username,
+        password: password,
+      };
+
+      // JSON enviado para API assim como no Insomia
+      fetch("http://localhost:8080/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Erro na requisição");
+          }
+          return response.json();
+        })
+        .then((responseData) => {
+          localStorage.setItem("jwt", responseData.jwt);
+          // Forçar recarregamento da página
+          window.location.reload(); // Isso recarrega a página inteira
+          navigate("/DashBoard"); // Redireciona para o Dashboard
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          setLoginError("Credenciais inválidas ou erro de conexão.");
+        });
     }
   };
 
-  const navigate = useNavigate();
-
   const goToUserForm = () => {
     navigate("/UserForm");
-    console.log("Redirecionando para Formulario");
   };
 
   const handleForgotPassword = () => {
     navigate("/RecoverPass");
-    console.log("Redirecionando para recuperação de senha...");
   };
 
   return (
@@ -61,6 +90,11 @@ function LoginForm() {
         <Box mb={4}>
           <img src={logo} alt="Logo" style={{ width: "250px" }} />
         </Box>
+        {successMessage && (
+          <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+            {successMessage}
+          </Alert>
+        )}
         <TextField
           label="Código SIAPE"
           variant="outlined"
@@ -68,8 +102,8 @@ function LoginForm() {
           margin="normal"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          error={!!errors.username} // Exibe erro se houver
-          helperText={errors.username} // Exibe mensagem de erro
+          error={!!errors.username}
+          helperText={errors.username}
         />
         <TextField
           label="Senha"
@@ -79,16 +113,23 @@ function LoginForm() {
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={!!errors.password} // Exibe erro se houver
-          helperText={errors.password} // Exibe mensagem de erro
+          error={!!errors.password}
+          helperText={errors.password}
         />
+
+        {loginError && (
+          <Typography color="error" variant="body2" align="center" mt={2}>
+            {loginError}
+          </Typography>
+        )}
+
         <Button
           type="submit"
           variant="contained"
           color="primary"
           fullWidth
           sx={{
-            marginTop: '10px',
+            marginTop: "10px",
             backgroundColor: "green",
             "&:hover": {
               backgroundColor: "darkgreen",

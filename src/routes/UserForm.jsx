@@ -11,9 +11,10 @@ import {
 
 // Tipos de usuário definidos no enum
 const typeUserOptions = [
-  { value: "TEACHER", label: "Professor" },
-  { value: "ADMIN", label: "Administrador" },
+  { value: "Professor", label: "Professor" },
+  { value: "Administrador", label: "Administrador" },
 ];
+import { useNavigate } from "react-router-dom";
 
 function UserForm() {
   const [formValues, setFormValues] = useState({
@@ -28,6 +29,8 @@ function UserForm() {
   const [image, setImage] = useState(null); // Estado para armazenar a imagem
   const [errors, setErrors] = useState({});
   const [imageError, setImageError] = useState(""); // Erro para o campo de imagem
+
+  const navigate = useNavigate();
 
   const validate = () => {
     let tempErrors = {};
@@ -72,32 +75,52 @@ function UserForm() {
     event.preventDefault();
 
     if (validate()) {
+      // Crie o objeto userRequest com todos os dados
+      const userRequest = {
+        firstName: formValues.firstName,
+        lastName: formValues.lastName,
+        email: formValues.email,
+        password: formValues.password,
+        identificationCode: formValues.identificationCode,
+        typeUser: formValues.typeUser,
+      };
+    
+      // Crie um FormData para enviar a imagem
       const formData = new FormData();
-
-      // Adicionar os valores do formulário ao FormData
-      formData.append("firstName", formValues.firstName);
-      formData.append("lastName", formValues.lastName);
-      formData.append("email", formValues.email);
-      formData.append("password", formValues.password);
-      formData.append("identificationCode", formValues.identificationCode);
-      formData.append("typeUser", formValues.typeUser);
-
+    
+      // Adicione o objeto userRequest como JSON para o FormData
+      formData.append("userRequest", JSON.stringify(userRequest)); // O objeto userRequest é convertido em JSON
+    
       // Adicionar a imagem ao FormData
       formData.append("image", image); // 'image' é a chave que será usada no backend para receber o arquivo
-
+    
       // Exemplo de chamada para API (usando fetch)
-      fetch("/api/user", {
+      fetch("http://localhost:8080/users/", {
         method: "POST",
         body: formData, // Enviando o FormData
       })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Sucesso:", data);
-        })
-        .catch((error) => {
-          console.error("Erro:", error);
+      .then((response) => {
+        if (!response.ok) {
+          // Se a resposta não for 2xx, trata o erro
+          throw new Error("Erro na requisição");
+        }
+    
+        // Se o código de status for 201, podemos apenas confirmar o sucesso
+        if (response.status === 201) {
+          console.log("Usuário criado com sucesso!");
+          // Aqui você pode redirecionar ou exibir uma mensagem de sucesso
+        }
+      })
+      .then((data) => {
+        // Caso o registro seja bem-sucedido, redireciona para a página de login com uma mensagem
+        navigate("/login", {
+          state: { successMessage: "Usuário registrado com sucesso!" }, // Passa a mensagem
         });
-    }
+      })
+      .catch((error) => {
+        console.error("Erro:", error);
+      });
+    }    
   };
 
   const handleInputChange = (event) => {

@@ -1,21 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Menu from "../components/Menu";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Box, Typography, Button, Container } from "@mui/material";
-import { useState } from "react";
 import "../css/dashBoard.css";
+import { jwtDecode } from 'jwt-decode';
 
 function DashBoard() {
   // Variaveis core.
-  const [username, setUsername] = useState("@User");
-  const reservations = [
-    { lab: "Laboratório 1", time: "15:20" },
-    { lab: "Laboratório 2", time: "18:20" },
-    { lab: "Laboratório 3", time: "20:20" },
-    { lab: "Laboratório 4", time: "10:00" },
-  ];
+  const decoded = jwtDecode(localStorage.getItem("jwt"));
+  const [username, setUsername] = useState(decoded.userFullName);
+  const [reservations, setReservations] = useState([]);
+
+  const navigate = useNavigate();
 
   // Configurações do slider
   const settings = {
@@ -92,15 +91,18 @@ function DashBoard() {
         </Typography>
 
         {/* Carrossel de Laboratórios Reservados */}
-        <Container sx={{
-            backgroundColor: "white",
-            borderRadius: "20px"
-        }}>
-          <Slider {...settings}>
-            {reservations.map((reservation, index) => (
-              <Box
-                key={index}
-                sx={{
+        <Container sx={{ backgroundColor: "white", borderRadius: "20px" }}>
+          {/* Verificação se há reservas */}
+          {reservations.length === 0 ? (
+            <Typography variant="h6" sx={{ textAlign: "center", margin: "20px" }}>
+              Nenhuma reserva encontrada para hoje.
+            </Typography>
+          ) : (
+            <Slider {...settings}>
+              {reservations.map((reservation, index) => (
+                <Box
+                  key={index}
+                  sx={{
                     display: "flex",
                     backgroundColor: "#FFFFFF",
                     minHeight: "15vh",
@@ -109,16 +111,18 @@ function DashBoard() {
                     fontFamily: "Poppins",
                     color: "#1f2732",
                     textAlign: "center", // Centraliza o texto dentro do Box    
-                }}
-              >
-                <Typography variant="h6" sx={{
-                    marginTop: "20px"
-                }}>{reservation.lab}</Typography>
-                <Typography variant="body1">{reservation.time}</Typography>
-              </Box>
-            ))}
-          </Slider>
+                  }}
+                >
+                  <Typography variant="h6" sx={{ marginTop: "20px" }}>
+                    {reservation.lab}
+                  </Typography>
+                  <Typography variant="body1">{reservation.time}</Typography>
+                </Box>
+              ))}
+            </Slider>
+          )}
         </Container>
+
         {/* Reserve um laboratório */}
         <Box
           sx={{
@@ -133,21 +137,19 @@ function DashBoard() {
             Reserve um laboratório
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            {["Laboratório 1", "Laboratório 2", "Laboratório 3"].map(
-              (lab, index) => (
-                <Button
-                  key={index}
-                  variant="contained"
-                  color="secondary"
-                  sx={{
-                    backgroundColor: "#1F2732",
-                    "&:hover": { backgroundColor: "#3c475a" },
-                  }}
-                >
-                  {lab}
-                </Button>
-              )
-            )}
+            {["Laboratório 1", "Laboratório 2", "Laboratório 3"].map((lab, index) => (
+              <Button
+                key={index}
+                variant="contained"
+                color="secondary"
+                sx={{
+                  backgroundColor: "#1F2732",
+                  "&:hover": { backgroundColor: "#3c475a" },
+                }}
+              >
+                {lab}
+              </Button>
+            ))}
           </Box>
         </Box>
 
