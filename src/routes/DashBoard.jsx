@@ -4,44 +4,71 @@ import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { Box, Typography, Button, Container } from "@mui/material";
-import "../css/dashBoard.css";
-import { jwtDecode } from 'jwt-decode';
+import { Box, Typography, Container } from "@mui/material";
+import { jwtDecode } from "jwt-decode";
 
 function DashBoard() {
-  // Variaveis core.
   const decoded = jwtDecode(localStorage.getItem("jwt"));
   const [username, setUsername] = useState(decoded.userFullName);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [reservations, setReservations] = useState([]);
 
   const navigate = useNavigate();
 
-  // Configurações do slider
+  useEffect(() => {
+    const fetchUserReservations = async () => {
+      setLoading(true);
+
+      try {
+        const token = localStorage.getItem("jwt");
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado.");
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.userId;
+
+        const response = await fetch(
+          `http://localhost:8080/reserves/by-user?userID=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar reservas do usuário.");
+        }
+
+        const data = await response.json();
+        console.log(data);
+        setReservations(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserReservations();
+  }, []);
+
   const settings = {
-    dots: true, // Exibe indicadores abaixo do carrossel
-    infinite: true, // Loop infinito
-    speed: 500, // Velocidade de transição
-    slidesToShow: 3, // Quantidade de slides visíveis
-    slidesToScroll: 1, // Quantidade de slides ao rolar
-    arrows: true, // Exibe setas de navegação
-    responsive: [
-      {
-        breakpoint: 1024, // Para telas menores que 1024px
-        settings: {
-          slidesToShow: 2, // Mostra 2 slides
-        },
-      },
-      {
-        breakpoint: 600, // Para telas menores que 600px
-        settings: {
-          slidesToShow: 1, // Mostra 1 slide
-        },
-      },
-    ],
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+  };
+
+  const handleReservationClick = (reservationId) => {
+    navigate(`/edit-reservation/${reservationId}`);
   };
 
   return (
-    // TELA
     <Box
       sx={{
         display: "flex",
@@ -64,7 +91,6 @@ function DashBoard() {
           minWidth: "80vw",
         }}
       >
-        {/* Saudação do usuário */}
         <Typography
           variant="h5"
           sx={{
@@ -90,94 +116,61 @@ function DashBoard() {
           Veja suas reservas do dia
         </Typography>
 
-        {/* Carrossel de Laboratórios Reservados */}
         <Container sx={{ backgroundColor: "white", borderRadius: "20px" }}>
-          {/* Verificação se há reservas */}
           {reservations.length === 0 ? (
-            <Typography variant="h6" sx={{ textAlign: "center", margin: "20px" }}>
+            <Typography
+              variant="h6"
+              sx={{ textAlign: "center", margin: "20px" }}
+            >
               Nenhuma reserva encontrada para hoje.
             </Typography>
           ) : (
             <Slider {...settings}>
-              {reservations.map((reservation, index) => (
+              {reservations.map((reservation) => (
                 <Box
-                  key={index}
+                  key={reservation.id} // Usando 'reservation.id' para garantir a unicidade da chave
                   sx={{
                     display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
                     backgroundColor: "#FFFFFF",
-                    minHeight: "15vh",
-                    minWidth: "10vw",
+                    minHeight: "20vh",
+                    minWidth: "15vw",
                     borderRadius: "10px",
                     fontFamily: "Poppins",
                     color: "#1f2732",
-                    textAlign: "center", // Centraliza o texto dentro do Box    
+                    padding: "10px",
+                    textAlign: "center",
+                    cursor: "pointer",
                   }}
+                  onClick={() => handleReservationClick(reservation.id)}
                 >
-                  <Typography variant="h6" sx={{ marginTop: "20px" }}>
-                    {reservation.lab}
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", marginBottom: "8px" }}
+                  >
+                    Laboratório: {reservation.reservable}
                   </Typography>
-                  <Typography variant="body1">{reservation.time}</Typography>
+                  <Typography variant="body2">
+                    Status: {reservation.status}
+                  </Typography>
+                  <Typography variant="body2">
+                    Observação: {reservation.observation}
+                  </Typography>
+                  <Typography variant="body2">
+                    Período: {reservation.period.startDay} até{" "}
+                    {reservation.period.endDay}
+                  </Typography>
+                  <Typography variant="body2">
+                    Horário: {reservation.period.startHorary} -{" "}
+                    {reservation.period.endHorary}
+                  </Typography>
                 </Box>
               ))}
             </Slider>
           )}
         </Container>
-
-        {/* Reserve um laboratório */}
-        <Box
-          sx={{
-            marginTop: "32px",
-            padding: "16px",
-            backgroundColor: "#4CAF50",
-            borderRadius: "8px",
-            color: "#fff",
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Reserve um laboratório
-          </Typography>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            {["Laboratório 1", "Laboratório 2", "Laboratório 3"].map((lab, index) => (
-              <Button
-                key={index}
-                variant="contained"
-                color="secondary"
-                sx={{
-                  backgroundColor: "#1F2732",
-                  "&:hover": { backgroundColor: "#3c475a" },
-                }}
-              >
-                {lab}
-              </Button>
-            ))}
-          </Box>
-        </Box>
-
-        {/* Últimas Reservas */}
-        <Box sx={{ marginTop: "32px" }}>
-          <Typography variant="h6" gutterBottom sx={{ color: "#4CAF50" }}>
-            Últimas reservas
-          </Typography>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            {["Lab 1", "Lab 2", "Lab 3"].map((lab, index) => (
-              <Box
-                key={index}
-                sx={{
-                  backgroundColor: "#fff",
-                  padding: "16px",
-                  borderRadius: "8px",
-                  minWidth: "150px",
-                  textAlign: "center",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <Typography variant="h6" sx={{ color: "#1F2732" }}>
-                  {lab}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </Box>
       </Container>
     </Box>
   );

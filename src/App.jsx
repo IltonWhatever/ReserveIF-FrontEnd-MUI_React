@@ -9,6 +9,10 @@ import Labs from "./routes/Labs";
 import EditLab from "./routes/EditLab";
 import LabForm from "./routes/LabForm";
 import ReservationForm from "./routes/Reservas";
+import EditReservartionForm from "./routes/EditReservationForm";
+import Reservas from "./routes/Reservas";
+import PendingReservations from "./routes/PendingReservations";
+import Reports from "./routes/Reports";
 
 function App() {
   // Autenticação para ver o DashBoard
@@ -26,6 +30,10 @@ function App() {
         <Route path="/edit-lab/:id" element={<EditLab />} />
         <Route path="/LabForm" element={<LabForm/>}/>
         <Route path="/ReservationForm" element={<ReservationForm/>}/>
+        <Route path="/edit-reservation/:reservationId" element={<EditReservartionForm/>}/>
+        <Route path="/ReservationForm" element={<Reservas/>}/>
+        <Route path="/PendingReservations" element={<PendingReservations/>}/>
+        <Route path="/Reports" element={<Reports/>}/>
       </Routes>
     </Router>
   );

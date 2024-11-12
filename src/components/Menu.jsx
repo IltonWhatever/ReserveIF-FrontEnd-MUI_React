@@ -13,6 +13,8 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import LogoutIcon from "@mui/icons-material/Logout";
 import logo from "../assets/logoBranca.png";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import { useNavigate } from "react-router-dom";
 import "../css/menu.css";
 import { jwtDecode  } from 'jwt-decode';
@@ -96,16 +98,36 @@ function VerticalMenu() {
           </ListItemIcon>
           <ListItemText className="drawer-item-text" primary="Reservas" />
         </ListItemButton>
-
         <ListItemButton
           className="drawer-item"
-          onClick={() => handleNavigation("/Relatorios")}
+          onClick={() => handleNavigation("/ReservationForm")}
+        >
+          <ListItemIcon>
+            <NewspaperIcon className="drawer-icon" />
+          </ListItemIcon>
+          <ListItemText className="drawer-item-text" primary="Nova Reserva" />
+        </ListItemButton>
+
+        {isAdmin && (<ListItemButton
+          className="drawer-item"
+          onClick={() => handleNavigation("/PendingReservations")}
+        >
+          <ListItemIcon>
+            <PendingActionsIcon className="drawer-icon" />
+          </ListItemIcon>
+          <ListItemText className="drawer-item-text" primary="Reservas Pendentes" />
+        </ListItemButton>)}
+
+        {isAdmin &&(
+        <ListItemButton
+          className="drawer-item"
+          onClick={() => handleNavigation("/Reports")}
         >
           <ListItemIcon>
             <AssessmentIcon className="drawer-icon" />
           </ListItemIcon>
           <ListItemText className="drawer-item-text" primary="Relatórios" />
-        </ListItemButton>
+        </ListItemButton>)}
 
         <ListItemButton className="drawer-item" onClick={() => handleLogout()}>
           <ListItemIcon>

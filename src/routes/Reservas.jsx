@@ -145,7 +145,7 @@ const ReservationForm = () => {
       });
 
       if (response.ok) {
-        navigate("/reservations");
+        navigate("/DashBoard");
       } else {
         console.error("Erro ao cadastrar reserva.");
       }
