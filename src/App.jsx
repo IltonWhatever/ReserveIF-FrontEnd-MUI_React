@@ -7,7 +7,8 @@ import RecoverPass from "./routes/RecoverPass";
 import DashBoard from "./routes/DashBoard";
 import Labs from "./routes/Labs";
 import EditLab from "./routes/EditLab";
-import LabForm from "./routes/LabForm"
+import LabForm from "./routes/LabForm";
+import ReservationForm from "./routes/Reservas";
 
 function App() {
   // Autenticação para ver o DashBoard
@@ -24,6 +25,7 @@ function App() {
         <Route path="/Labs" element={<Labs />} />
         <Route path="/edit-lab/:id" element={<EditLab />} />
         <Route path="/LabForm" element={<LabForm/>}/>
+        <Route path="/ReservationForm" element={<ReservationForm/>}/>
       </Routes>
     </Router>
   );

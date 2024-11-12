@@ -31,7 +31,6 @@ function VerticalMenu() {
   if (token) {
     const decoded = jwtDecode(token);
     isAdmin = decoded.groups.includes("Administrador");
-    console.log(decoded)
   }
 
   const handleLogout = () => {
@@ -65,7 +64,7 @@ function VerticalMenu() {
 
       {/* Lista de opções */}
       <List>
-        {isAdmin && (<ListItemButton
+       <ListItemButton
           className="drawer-item"
           onClick={() => handleNavigation("/Labs")}
         >
@@ -73,7 +72,7 @@ function VerticalMenu() {
             <LaptopMacIcon className="drawer-icon" />
           </ListItemIcon>
           <ListItemText className="drawer-item-text" primary="Laboratórios" />
-        </ListItemButton>)}
+        </ListItemButton>
 
         {isAdmin && (<ListItemButton
           className="drawer-item"
@@ -90,7 +89,7 @@ function VerticalMenu() {
 
         <ListItemButton
           className="drawer-item"
-          onClick={() => handleNavigation("/Reservas")}
+          onClick={() => handleNavigation("/DashBoard")}
         >
           <ListItemIcon>
             <EventAvailableIcon className="drawer-icon" />

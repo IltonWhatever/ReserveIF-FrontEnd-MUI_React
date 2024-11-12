@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Menu from "../components/Menu";
+import { jwtDecode  } from 'jwt-decode';
 
 const EditLab = () => {
   const { id } = useParams();
@@ -15,8 +16,14 @@ const EditLab = () => {
 
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("jwt");
+  let isAdmin = false;
+  if (token) {
+    const decoded = jwtDecode(token);
+    isAdmin = decoded.groups.includes("Administrador");
+  }
+
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
     if (!token) {
       navigate("/login");
       return;
@@ -175,6 +182,7 @@ const EditLab = () => {
                 value={lab.name}
                 onChange={handleChange}
                 required
+                disabled={!isAdmin}
               />
 
               {/* Localização do laboratório */}
@@ -187,10 +195,11 @@ const EditLab = () => {
                 value={lab.location}
                 onChange={handleChange}
                 required
+                disabled={!isAdmin}
               />
 
               {/* Botões */}
-              <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              {isAdmin && (<Box sx={{ textAlign: "center", marginTop: "20px" }}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -211,7 +220,7 @@ const EditLab = () => {
                 >
                   Deletar
                 </Button>
-              </Box>
+              </Box>)}
             </form>
           )}
         </Container>
