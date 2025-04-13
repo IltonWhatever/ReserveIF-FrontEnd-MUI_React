@@ -22,7 +22,7 @@ const EditReservationForm = () => {
     observation: "",
     reservableId: "",
     userId: "",
-    period: {
+    periodReserve: {
       startDay: null,
       endDay: null,
       startHorary: null,
@@ -66,12 +66,12 @@ const EditReservationForm = () => {
         console.log(data)
         setFormData({
           ...data,
-          period: {
-            startDay: dayjs(data.period.startDay),
-            endDay: dayjs(data.period.endDay),
-            startHorary: dayjs(data.period.startHorary),
-            endHorary: dayjs(data.period.endHorary),
-            daysOfWeek: data.period.daysOfWeek,
+          periodReserve: {
+            startDay: dayjs(data.periodReserve.startDay),
+            endDay: dayjs(data.periodReserve.endDay),
+            startHorary: dayjs(data.periodReserve.startHorary),
+            endHorary: dayjs(data.periodReserve.endHorary),
+            daysOfWeek: data.periodReserve.daysOfWeek,
           },
         });
       }
@@ -83,10 +83,10 @@ const EditReservationForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name in formData.period) {
+    if (name in formData.periodReserve) {
       setFormData({
         ...formData,
-        period: { ...formData.period, [name]: value },
+        periodReserve: { ...formData.periodReserve, [name]: value },
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -97,21 +97,21 @@ const EditReservationForm = () => {
     let dateError = "";
     let timeError = "";
 
-    if (formData.period.startDay && formData.period.endDay) {
+    if (formData.periodReserve.startDay && formData.periodReserve.endDay) {
       if (
-        formData.period.startDay.isAfter(formData.period.endDay)
+        formData.periodReserve.startDay.isAfter(formData.periodReserve.endDay)
       ) {
         dateError = "A data de início não pode ser maior que a data de fim.";
       }
     }
 
     if (
-      formData.period.startHorary &&
-      formData.period.endHorary
+      formData.periodReserve.startHorary &&
+      formData.periodReserve.endHorary
     ) {
       if (
-        formData.period.startHorary.isAfter(
-          formData.period.endHorary
+        formData.periodReserve.startHorary.isAfter(
+          formData.periodReserve.endHorary
         )
       ) {
         timeError =
@@ -129,12 +129,12 @@ const EditReservationForm = () => {
 
     const formattedData = {
       ...formData,
-      period: {
-        ...formData.period,
-        startDay: dayjs(formData.period.startDay).format("DD/MM/YYYY"),
-        endDay: dayjs(formData.period.endDay).format("DD/MM/YYYY"),
-        startHorary: dayjs(formData.period.startHorary).format("HH:mm"),
-        endHorary: dayjs(formData.period.endHorary).format("HH:mm"),
+      periodReserve: {
+        ...formData.periodReserve,
+        startDay: dayjs(formData.periodReserve.startDay).format("DD/MM/YYYY"),
+        endDay: dayjs(formData.periodReserve.endDay).format("DD/MM/YYYY"),
+        startHorary: dayjs(formData.periodReserve.startHorary).format("HH:mm"),
+        endHorary: dayjs(formData.periodReserve.endHorary).format("HH:mm"),
       },
     };
 
@@ -240,12 +240,12 @@ const EditReservationForm = () => {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Data de Início"
-                value={formData.period.startDay}
+                value={formData.periodReserve.startDay}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    period: {
-                      ...formData.period,
+                    periodReserve: {
+                      ...formData.periodReserve,
                       startDay: newValue,
                     },
                   })
@@ -254,12 +254,12 @@ const EditReservationForm = () => {
               />
               <DatePicker
                 label="Data de Fim"
-                value={formData.period.endDay}
+                value={formData.periodReserve.endDay}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    period: {
-                      ...formData.period,
+                    periodReserve: {
+                      ...formData.periodReserve,
                       endDay: newValue,
                     },
                   })
@@ -268,12 +268,12 @@ const EditReservationForm = () => {
               />
               <TimePicker
                 label="Horário de Início"
-                value={formData.period.startHorary}
+                value={formData.periodReserve.startHorary}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    period: {
-                      ...formData.period,
+                    periodReserve: {
+                      ...formData.periodReserve,
                       startHorary: newValue,
                     },
                   })
@@ -282,12 +282,12 @@ const EditReservationForm = () => {
               />
               <TimePicker
                 label="Horário de Fim"
-                value={formData.period.endHorary}
+                value={formData.periodReserve.endHorary}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    period: {
-                      ...formData.period,
+                    periodReserve: {
+                      ...formData.periodReserve,
                       endHorary: newValue,
                     },
                   })
