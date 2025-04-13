@@ -64,16 +64,18 @@ const EditReservationForm = () => {
         
         const data = await response.json();
         console.log(data)
-        setFormData({
-          ...data,
-          periodReserve: {
-            startDay: dayjs(data.periodReserve.startDay),
-            endDay: dayjs(data.periodReserve.endDay),
-            startHorary: dayjs(data.periodReserve.startHorary),
-            endHorary: dayjs(data.periodReserve.endHorary),
-            daysOfWeek: data.periodReserve.daysOfWeek,
-          },
-        });
+        setFormData((prevData) => ({
+  ...prevData,
+  ...data,
+  periodReserve: {
+    startDay: dayjs(data.periodReserve.startDay),
+    endDay: dayjs(data.periodReserve.endDay),
+    startHorary: dayjs(data.periodReserve.startHorary),
+    endHorary: dayjs(data.periodReserve.endHorary),
+    daysOfWeek: data.periodReserve.daysOfWeek,
+  },
+}));
+
       }
     };
 
