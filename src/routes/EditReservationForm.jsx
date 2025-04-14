@@ -22,7 +22,7 @@ const EditReservationForm = () => {
     observation: "",
     reservableId: "",
     userId: "",
-    periodReserve: {
+    period: {
       startDay: null,
       endDay: null,
       startHorary: null,
@@ -35,6 +35,11 @@ const EditReservationForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('formData atualizado:', formData);
+  }, [formData]);
+  
+
+  useEffect(() => {
     const token = localStorage.getItem("jwt");
     if (token) {
       const decodedToken = jwtDecode(token);
@@ -43,52 +48,56 @@ const EditReservationForm = () => {
         userId: decodedToken.userId,
       }));
     }
-
-    const fetchLabs = async () => {
-      const response = await fetch("http://localhost:8080/reservables", {
-        headers: { Authorization: `Bearer ${token}` },
+  
+    const fetchLabsAndReservation = async () => {
+      const labsResponse = await fetch("http://localhost:8080/reservables", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
-      if (response.ok) {
-        setLabs(await response.json());
-      }
-    };
-
-    const fetchReservation = async () => {
-      const response = await fetch(
+  
+      if (!labsResponse.ok) return;
+      const labsData = await labsResponse.json();
+      setLabs(labsData);
+  
+      const reservationResponse = await fetch(
         `http://localhost:8080/reserves/${reservationId}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
         }
       );
-      if (response.ok) {
-        
-        const data = await response.json();
-        console.log(data)
-        setFormData((prevData) => ({
-  ...prevData,
-  ...data,
-  periodReserve: {
-    startDay: dayjs(data.periodReserve.startDay),
-    endDay: dayjs(data.periodReserve.endDay),
-    startHorary: dayjs(data.periodReserve.startHorary),
-    endHorary: dayjs(data.periodReserve.endHorary),
-    daysOfWeek: data.periodReserve.daysOfWeek,
-  },
-}));
-
+  
+      if (!reservationResponse.ok) {
+        console.error('Erro ao buscar reserva');
+        return;
       }
+  
+      const data = await reservationResponse.json();
+      const matchedLab = labsData.find((lab) => lab.name === data.reservable)?.id;
+  
+      setFormData({
+        id: data.id,
+        observation: data.observation,
+        reservableId: matchedLab || '',
+        status: data.status,
+        user: data.user,
+        period: {
+          startDay: data.period.startDay ? dayjs(data.period.startDay, 'DD/MM/YYYY') : null,
+          endDay: data.period.endDay ? dayjs(data.period.endDay, 'DD/MM/YYYY') : null,
+          startHorary: data.period.startHorary ? dayjs(data.period.startHorary, 'HH:mm') : null,
+          endHorary: data.period.endHorary ? dayjs(data.period.endHorary, 'HH:mm') : null,
+          daysOfWeek: data.period.daysOfWeek || [],
+        }
+      });
     };
-
-    fetchLabs();
-    fetchReservation();
+  
+    fetchLabsAndReservation();
   }, [reservationId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name in formData.periodReserve) {
+    if (name in formData.period) {
       setFormData({
         ...formData,
-        periodReserve: { ...formData.periodReserve, [name]: value },
+        period: { ...formData.period, [name]: value },
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -99,21 +108,21 @@ const EditReservationForm = () => {
     let dateError = "";
     let timeError = "";
 
-    if (formData.periodReserve.startDay && formData.periodReserve.endDay) {
+    if (formData.period.startDay && formData.period.endDay) {
       if (
-        formData.periodReserve.startDay.isAfter(formData.periodReserve.endDay)
+        formData.period.startDay.isAfter(formData.period.endDay)
       ) {
         dateError = "A data de início não pode ser maior que a data de fim.";
       }
     }
 
     if (
-      formData.periodReserve.startHorary &&
-      formData.periodReserve.endHorary
+      formData.period.startHorary &&
+      formData.period.endHorary
     ) {
       if (
-        formData.periodReserve.startHorary.isAfter(
-          formData.periodReserve.endHorary
+        formData.period.startHorary.isAfter(
+          formData.period.endHorary
         )
       ) {
         timeError =
@@ -127,37 +136,50 @@ const EditReservationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
 
-    const formattedData = {
-      ...formData,
+    // Monta o body da requisição no formato esperado pela API
+    const payload = {
+      observation: formData.observation,
+      reservableId: formData.reservableId,
+      userId: formData.user.id,
       periodReserve: {
-        ...formData.periodReserve,
-        startDay: dayjs(formData.periodReserve.startDay).format("DD/MM/YYYY"),
-        endDay: dayjs(formData.periodReserve.endDay).format("DD/MM/YYYY"),
-        startHorary: dayjs(formData.periodReserve.startHorary).format("HH:mm"),
-        endHorary: dayjs(formData.periodReserve.endHorary).format("HH:mm"),
-      },
+        startDay: formData.period.startDay.format('DD/MM/YYYY'),
+        endDay: formData.period.endDay.format('DD/MM/YYYY'),
+        startHorary: formData.period.startHorary.format('HH:mm'),
+        endHorary: formData.period.endHorary.format('HH:mm'),
+        daysOfWeek: formData.period.daysOfWeek,
+      }
     };
 
-    const response = await fetch(
-      `http://localhost:8080/reserves/${reservationId}`,
-      {
+    try {
+      const response = await fetch(`http://localhost:8080/reserves/${formData.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`
         },
-        body: JSON.stringify(formattedData),
-      }
-    );
+        body: JSON.stringify(payload)
+      });
 
-    if (response.ok) {
+      const text = await response.text();
+      if (text) {
+        const result = JSON.parse(text);
+        console.log("Reserva atualizada:", result);
+      } else {
+        console.log("Reserva atualizada com sucesso (sem resposta)");
+      }
+
+
+      const result = await response.json();
+      console.log("Reserva atualizada com sucesso:", result);
       navigate("/DashBoard");
-    } else {
-      console.error("Erro ao atualizar reserva.");
+    } catch (error) {
+      console.error("Erro no envio:", error);
+      console.log(payload)
+      navigate("/DashBoard");
     }
   };
+
 
   const handleDelete = async () => {
     const response = await fetch(
@@ -198,12 +220,12 @@ const EditReservationForm = () => {
         }}
       >
         <Container sx={{
-            margin: "15px",
-            backgroundColor: "white",
-            borderRadius: "8px",
-            display: "block",
-            padding: "20px",
-          }}>
+          margin: "15px",
+          backgroundColor: "white",
+          borderRadius: "8px",
+          display: "block",
+          padding: "20px",
+        }}>
           <Typography variant="h5">Editar Reserva</Typography>
 
           {errors.dateError && (
@@ -228,10 +250,13 @@ const EditReservationForm = () => {
               label="Laboratório"
               name="reservableId"
               select
-              value={formData.reservableId}
+              value={formData.reservableId || ''}  // Usar '' como fallback caso o valor seja undefined
               onChange={handleChange}
               required
             >
+              <MenuItem value="">
+                Selecione um laboratório
+              </MenuItem>
               {labs.map((lab) => (
                 <MenuItem key={lab.id} value={lab.id}>
                   {`ID: ${lab.id} - ${lab.name}`}
@@ -239,15 +264,16 @@ const EditReservationForm = () => {
               ))}
             </TextField>
 
+
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Data de Início"
-                value={formData.periodReserve.startDay}
+                value={formData.period.startDay}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    periodReserve: {
-                      ...formData.periodReserve,
+                    period: {
+                      ...formData.period,
                       startDay: newValue,
                     },
                   })
@@ -256,12 +282,12 @@ const EditReservationForm = () => {
               />
               <DatePicker
                 label="Data de Fim"
-                value={formData.periodReserve.endDay}
+                value={formData.period.endDay}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    periodReserve: {
-                      ...formData.periodReserve,
+                    period: {
+                      ...formData.period,
                       endDay: newValue,
                     },
                   })
@@ -270,12 +296,12 @@ const EditReservationForm = () => {
               />
               <TimePicker
                 label="Horário de Início"
-                value={formData.periodReserve.startHorary}
+                value={formData.period.startHorary}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    periodReserve: {
-                      ...formData.periodReserve,
+                    period: {
+                      ...formData.period,
                       startHorary: newValue,
                     },
                   })
@@ -284,12 +310,12 @@ const EditReservationForm = () => {
               />
               <TimePicker
                 label="Horário de Fim"
-                value={formData.periodReserve.endHorary}
+                value={formData.period.endHorary}
                 onChange={(newValue) =>
                   setFormData({
                     ...formData,
-                    periodReserve: {
-                      ...formData.periodReserve,
+                    period: {
+                      ...formData.period,
                       endHorary: newValue,
                     },
                   })
@@ -302,6 +328,7 @@ const EditReservationForm = () => {
               variant="contained"
               color="primary"
               type="submit"
+              onClick={handleSubmit}
               sx={{ mt: 2 }}
             >
               Atualizar Reserva

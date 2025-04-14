@@ -68,6 +68,11 @@ function DashBoard() {
     navigate(`/edit-reservation/${reservationId}`);
   };
 
+    useEffect(() => {
+      console.log('Reserva', reservations);
+    }, [reservations]);
+    
+
   return (
     <Box
       sx={{
