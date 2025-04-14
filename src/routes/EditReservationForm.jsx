@@ -7,6 +7,7 @@ import {
   Button,
   MenuItem,
   Alert,
+  Stack
 } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -226,7 +227,9 @@ const EditReservationForm = () => {
           display: "block",
           padding: "20px",
         }}>
-          <Typography variant="h5">Editar Reserva</Typography>
+          <Typography variant="h5" sx={{
+            margin: '15px'
+          }}>Editar Reserva</Typography>
 
           {errors.dateError && (
             <Alert severity="error">{errors.dateError}</Alert>
@@ -235,7 +238,10 @@ const EditReservationForm = () => {
             <Alert severity="error">{errors.timeError}</Alert>
           )}
 
+          
+
           <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
             <TextField
               fullWidth
               label="Observação"
@@ -323,7 +329,7 @@ const EditReservationForm = () => {
                 required
               />
             </LocalizationProvider>
-
+            </Stack>
             <Button
               variant="contained"
               color="primary"
@@ -342,6 +348,7 @@ const EditReservationForm = () => {
               Apagar Reserva
             </Button>
           </form>
+
         </Container>
       </Container>
     </Box>
